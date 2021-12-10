@@ -55,4 +55,6 @@ services:
       - "4002:80"
     environment:
       - PORT=80
+      - DBHOST=mongodb://db-stream-history:27017
+      - DBNAME=stream-history
     restart: "no"

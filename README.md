@@ -27,6 +27,8 @@
 
 ##### Db: Stream History
 - Connect to MongoDB on PORT 4041
+- Add db: stream-history
+- Add collection: videos-viewed
 
 ##### TestUrl
 ```
