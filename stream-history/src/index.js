@@ -18,7 +18,9 @@ function setupHandlers(app) {
 
       app.post('/viewed', (req, res) => {
         const videoId = req.body.videoId;
-        videosViewedCollection.insertOne({ videoId: videoId })
+        const viewedOn = req.body.viewedOn;
+        console.log(` ---------- VIDEO VIEWED! [ ${ viewedOn } ] ---------- `);
+        videosViewedCollection.insertOne({ videoId: videoId, viewedOn: viewedOn })
           .then(() => {
             console.log(`Stream-History :: Video Watched ID=${ videoId }`);
             res.sendStatus(200);
