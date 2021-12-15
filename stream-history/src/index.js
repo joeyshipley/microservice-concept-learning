@@ -22,10 +22,11 @@ function main() {
 
           function consumeVideoViewedMessage(msg) {
             const data = JSON.parse(msg.content.toString());
-            console.log(` --- HISTORY EVENT --- VIEWED <------------------------------------------------ `);
+            console.log(` --- (Stream-History) HISTORY EVENT --- VIEWED <------------------------------------------------ `);
             console.log(data);
             videosViewedCollection.insertOne({ videoId: data.videoId, viewedOn: data.viewedOn })
               .then(() => {
+                messageChannel.ack(msg);
                 console.log(`Stream-History :: Video Watched ID=${ data.videoId }`);
               })
               .catch((err) => {
@@ -58,9 +59,16 @@ function main() {
             console.log(`Stream-History :: Service ONLINE (PORT ${ PORT })`);
           });
 
-          return messageChannel.assertQueue('video-viewed', {})
+          return messageChannel.assertExchange('video-viewed', 'fanout')
             .then(() => {
-              return messageChannel.consume('video-viewed', consumeVideoViewedMessage);
+              return messageChannel.assertQueue('', { exclusive: true });
+            })
+            .then((response) => {
+              const queueName = response.queue;
+              return messageChannel.bindQueue(queueName, 'video-viewed', '')
+                .then(() => {
+                  return messageChannel.consume(queueName, consumeVideoViewedMessage);
+                });
             });
         })
         .catch((err) => {

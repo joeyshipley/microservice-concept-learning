@@ -87,7 +87,15 @@ function main() {
 function connectRabbit() {
   return amqp
     .connect(RABBIT)
-    .then((messagingConnection) => messagingConnection.createChannel());
+    .then((connection) => {
+      return connection.createChannel()
+        .then((messageChannel) => {
+          return messageChannel.assertExchange('video-viewed', 'fanout')
+            .then(() => {
+              return messageChannel;
+            });
+        });
+    });
 }
 
 function produceEventForVideoViewed(messageChannel, videoId) {
@@ -95,7 +103,7 @@ function produceEventForVideoViewed(messageChannel, videoId) {
     videoId,
     viewedOn: dayjs.utc().format(),
   };
-  messageChannel.publish('', "video-viewed", Buffer.from(JSON.stringify(data)));
+  messageChannel.publish('video-viewed', '', Buffer.from(JSON.stringify(data)));
 }
 
 function startService() {

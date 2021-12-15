@@ -42,9 +42,6 @@ services:
       - VIDEO_STORAGE_PORT=80
     env_file:
       - ./video-streaming/.env.local
-    depends_on:
-      - db-video-storage
-      - rabbit
     restart: "no"
 
   azure-storage:
@@ -75,7 +72,22 @@ services:
       - DBNAME=stream-history
     env_file:
       - ./stream-history/.env.local
-    depends_on:
-      - db-stream-history
-      - rabbit
+    restart: "no"
+
+  recommendations:
+    image: recommendations
+    build:
+      context: ./recommendations
+      dockerfile: DockerfileDEV
+    container_name: recommendations
+    volumes:
+      - /tmp/recommendations/npm-cache:/root/.npm:z
+      - ./recommendations/src:/usr/src/app/src:z
+    ports:
+      - "4003:80"
+    environment:
+      - PORT=80
+      - NODE_ENV=development
+    env_file:
+      - ./recommendations/.env.local
     restart: "no"
